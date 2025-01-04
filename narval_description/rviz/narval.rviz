@@ -1,0 +1,42 @@
+# narval.rviz
+
+# Global Options
+Global Options:
+  Fixed Frame: "base_link"
+  Update Interval: 0.033
+
+# Displays
+Displays:
+  - Name: RobotModel
+    Type: rviz/RobotModel
+    Enabled: true
+    Robot Description: /robot_description
+    Frame Locked: true
+
+  - Name: Grid
+    Type: rviz/Grid
+    Enabled: true
+    Plane: XY
+    Color: 0.65 0.65 0.65
+    Cell Size: 0.5
+    Line Style: Lines
+    Line Width: 0.03
+    Alpha: 0.5
+    Cell Count: 10 10
+    Subdivisions: 2
+    Min Height: 0.0
+    Max Height: 1.0
+
+  - Name: TF
+    Type: rviz/TF
+    Enabled: true
+
+  - Name: Axis
+    Type: rviz/Axis
+    Enabled: true
+    Length: 1
+    Radius: 0.1
+    Line Width: 0.02
+    Alpha: 1.0
+
+# Plugins and other configurations can go here
