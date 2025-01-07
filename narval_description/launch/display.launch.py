@@ -1,43 +1,47 @@
-# display.launch.py
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.actions import IncludeLaunchDescription
+from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.substitutions import FindPackageShare
+
 from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
     ld = LaunchDescription()
 
-    # Declare launch arguments
-    narval_description_path = FindPackageShare('narval_description')
+    narval_description_package = FindPackageShare('narval_description')
 
-    # Define paths for URDF and RViz configuration
-    default_model_path = PathJoinSubstitution([narval_description_path, 'urdf', 'full.urdf'])
-    default_rviz_config_path = PathJoinSubstitution([narval_description_path, 'rviz', 'narval.rviz'])
+    ld.add_action(DeclareLaunchArgument(name='jsp_gui', default_value='false', choices=['true', 'false'],
+                                        description='Flag to enable joint_state_publisher_gui'))
 
-    # Declare launch arguments
-    ld.add_action(DeclareLaunchArgument('model', default_value=default_model_path,
-                                        description='Path to the robot URDF file'))
-    ld.add_action(DeclareLaunchArgument('rvizconfig', default_value=default_rviz_config_path,
-                                        description='Path to RViz config file'))
+    default_rviz_config_path = PathJoinSubstitution([narval_description_package, 'rviz', 'urdf.rviz'])
+    ld.add_action(DeclareLaunchArgument(name='rviz_config', default_value=default_rviz_config_path,
+                                        description='Absolute path to rviz config file'))
 
-    # Robot state publisher node
-    ld.add_action(Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name='robot_state_publisher',
-        output='screen',
-        parameters=[{'robot_description': LaunchConfiguration('model')}]
+    # need to manually pass configuration in because of https://github.com/ros2/launch/issues/313
+    ld.add_action(IncludeLaunchDescription(
+        PathJoinSubstitution([narval_description_package, 'launch', 'description.launch.py'])
     ))
 
-    # Launch RViz2 with the given configuration file
+    # Depending on gui parameter, either launch joint_state_publisher or joint_state_publisher_gui
+    ld.add_action(Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        condition=UnlessCondition(LaunchConfiguration('jsp_gui'))
+    ))
+
+    ld.add_action(Node(
+        package='joint_state_publisher_gui',
+        executable='joint_state_publisher_gui',
+        condition=IfCondition(LaunchConfiguration('jsp_gui'))
+    ))
+
     ld.add_action(Node(
         package='rviz2',
         executable='rviz2',
-        name='rviz2',
         output='screen',
-        arguments=['-d', LaunchConfiguration('rvizconfig')]
+        arguments=['-d', LaunchConfiguration('rviz_config')],
     ))
-
     return ld

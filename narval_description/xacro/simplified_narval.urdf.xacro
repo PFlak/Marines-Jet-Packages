@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name="narval" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="narval">
 
     <xacro:property name="PI" value="3.1415926535897931" />
     <xacro:property name="RAD" value="${PI*2}" />
@@ -12,7 +12,7 @@
     <xacro:property name="MIDDLE_THRUSTER_Z" value="0.1" />
 
     <material name="gray">
-        <color rgba="0.2 0.2 0.2 1.0" />
+        <color rgba="0.4 0.4 0.4 1.0" />
     </material>
     <material name="blue">
         <color rgba="0 0 1 1" />
@@ -47,7 +47,8 @@
                 <geometry>
                     <sphere radius="0.02" />
                 </geometry>
-                <material name="blue" /> <!-- All visual elements in this link pick up this material -->
+                <material name="blue" />
+                <!-- All visual elements in this link pick up this material -->
             </visual>
             <!-- Rear cone -->
             <visual>
@@ -80,26 +81,27 @@
 
     <!-- Thruster origins-->
     <xacro:property name="front_right_origin">
-        <origin xyz="${LENGTH/2} ${-WIDTH/2} 0" rpy="${-THRUSTER_ANGLE} 0 0" />
+        <origin xyz="${LENGTH/2} ${-WIDTH/2} ${HEIGHT/2}" rpy="${-THRUSTER_ANGLE} 0 0" />
     </xacro:property>
     <xacro:property name="front_left_origin">
-        <origin xyz="${LENGTH/2} ${WIDTH/2} 0" rpy="${THRUSTER_ANGLE} 0 0" />
+        <origin xyz="${LENGTH/2} ${WIDTH/2} ${HEIGHT/2}" rpy="${THRUSTER_ANGLE} 0 0" />
     </xacro:property>
     <xacro:property name="middle_right_origin">
-        <origin xyz="0 ${-WIDTH/2} ${MIDDLE_THRUSTER_Z}" rpy="0 ${RAD/4} 0" />
+        <origin xyz="0 ${-WIDTH/2} ${MIDDLE_THRUSTER_Z + HEIGHT/2}" rpy="0 ${RAD/4} 0" />
     </xacro:property>
     <xacro:property name="middle_left_origin">
-        <origin xyz="0 ${WIDTH/2} ${MIDDLE_THRUSTER_Z}" rpy="0 ${RAD/4} 0" />
+        <origin xyz="0 ${WIDTH/2} ${MIDDLE_THRUSTER_Z + HEIGHT/2}" rpy="0 ${RAD/4} 0" />
     </xacro:property>
     <xacro:property name="rear_right_origin">
-        <origin xyz="${-LENGTH/2} ${-WIDTH/2} 0" rpy="${THRUSTER_ANGLE} 0 0" />
+        <origin xyz="${-LENGTH/2} ${-WIDTH/2} ${HEIGHT/2}" rpy="${THRUSTER_ANGLE} 0 0" />
     </xacro:property>
     <xacro:property name="rear_left_origin">
-        <origin xyz="${-LENGTH/2} ${WIDTH/2} 0" rpy="${-THRUSTER_ANGLE} 0 0" />
+        <origin xyz="${-LENGTH/2} ${WIDTH/2} ${HEIGHT/2}" rpy="${-THRUSTER_ANGLE} 0 0" />
     </xacro:property>
 
     <link name="base_link">
         <visual>
+            <origin xyz="0 0 ${HEIGHT/2}"/>
             <geometry>
                 <box size="${LENGTH} ${WIDTH} ${HEIGHT}" />
             </geometry>
