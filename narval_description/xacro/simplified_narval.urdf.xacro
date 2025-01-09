@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="narval">
+
+    <xacro:property name="PI" value="3.1415926535897931" />
+    <xacro:property name="RAD" value="${PI*2}" />
+
+    <xacro:property name="WIDTH" value="0.29" />
+    <xacro:property name="HEIGHT" value="0.22" />
+    <xacro:property name="LENGTH" value="0.662" />
+
+    <xacro:property name="THRUSTER_ANGLE" value="${0.1*RAD}" />
+    <xacro:property name="MIDDLE_THRUSTER_Z" value="0.1" />
+
+    <material name="gray">
+        <color rgba="0.4 0.4 0.4 1.0" />
+    </material>
+    <material name="blue">
+        <color rgba="0 0 1 1" />
+    </material>
+    <material name="red">
+        <color rgba="1 0 0 1" />
+    </material>
+    <material name="black">
+        <color rgba="0.0 0.0 0.0 1.0" />
+    </material>
+
+    <!-- Thruster macro -->
+    <xacro:macro name="t200" params="side name *origin">
+        <xacro:property name="THRUSTER_X_OFFSET" value="0" />
+        <xacro:property name="THRUSTER_Y_OFFSET" value="0" />
+        <xacro:property name="THRUSTER_Z_OFFSET" value="0.025" />
+
+        <xacro:if value="${side == 'left'}">
+            <xacro:property name="THRUSTER_X_OFFSET" value="0" />
+            <xacro:property name="THRUSTER_Y_OFFSET" value="0.04" />
+            <xacro:property name="THRUSTER_Z_OFFSET" value="0.025" />
+        </xacro:if>
+        <xacro:if value="${side == 'right'}">
+            <xacro:property name="THRUSTER_X_OFFSET" value="0" />
+            <xacro:property name="THRUSTER_Y_OFFSET" value="-0.04" />
+            <xacro:property name="THRUSTER_Z_OFFSET" value="0.025" />
+        </xacro:if>
+        <link name="t200_link_${name}">
+            <!-- Front cone -->
+            <visual>
+                <origin xyz="${THRUSTER_X_OFFSET} ${THRUSTER_Y_OFFSET} ${THRUSTER_Z_OFFSET}" />
+                <geometry>
+                    <sphere radius="0.02" />
+                </geometry>
+                <material name="blue" />
+                <!-- All visual elements in this link pick up this material -->
+            </visual>
+            <!-- Rear cone -->
+            <visual>
+                <origin xyz="${THRUSTER_X_OFFSET} ${THRUSTER_Y_OFFSET} ${THRUSTER_Z_OFFSET -0.07}" />
+                <geometry>
+                    <sphere radius="0.02" />
+                </geometry>
+            </visual>
+            <!-- Thruster body -->
+            <visual>
+                <origin xyz="${THRUSTER_X_OFFSET} ${THRUSTER_Y_OFFSET} ${THRUSTER_Z_OFFSET -0.035}" />
+                <geometry>
+                    <cylinder length="0.07" radius="0.02" />
+                </geometry>
+            </visual>
+            <!-- Propeller guard -->
+            <visual>
+                <origin xyz="${THRUSTER_X_OFFSET} ${THRUSTER_Y_OFFSET} ${THRUSTER_Z_OFFSET -0.0225}" />
+                <geometry>
+                    <cylinder length="0.045" radius="0.045" />
+                </geometry>
+            </visual>
+        </link>
+        <joint name="t200_joint_${name}" type="fixed">
+            <xacro:insert_block name="origin" />
+            <parent link="base_link" />
+            <child link="t200_link_${name}" />
+        </joint>
+    </xacro:macro>
+
+    <!-- Thruster origins-->
+    <xacro:property name="front_right_origin">
+        <origin xyz="${LENGTH/2} ${-WIDTH/2} 0" rpy="${-THRUSTER_ANGLE} 0 0" />
+    </xacro:property>
+    <xacro:property name="front_left_origin">
+        <origin xyz="${LENGTH/2} ${WIDTH/2} 0" rpy="${THRUSTER_ANGLE} 0 0" />
+    </xacro:property>
+    <xacro:property name="middle_right_origin">
+        <origin xyz="0 ${-WIDTH/2} ${MIDDLE_THRUSTER_Z}" rpy="0 ${RAD/4} 0" />
+    </xacro:property>
+    <xacro:property name="middle_left_origin">
+        <origin xyz="0 ${WIDTH/2} ${MIDDLE_THRUSTER_Z}" rpy="0 ${RAD/4} 0" />
+    </xacro:property>
+    <xacro:property name="rear_right_origin">
+        <origin xyz="${-LENGTH/2} ${-WIDTH/2} 0" rpy="${THRUSTER_ANGLE} 0 0" />
+    </xacro:property>
+    <xacro:property name="rear_left_origin">
+        <origin xyz="${-LENGTH/2} ${WIDTH/2} 0" rpy="${-THRUSTER_ANGLE} 0 0" />
+    </xacro:property>
+
+    <link name="base_link">
+        <visual>
+            <origin xyz="0 0 0"/>
+            <geometry>
+                <box size="${LENGTH} ${WIDTH} ${HEIGHT}" />
+            </geometry>
+            <material name="gray" />
+        </visual>
+    </link>
+
+    <!-- Attach thrusters to the base_link -->
+    <xacro:t200 name="front_right" side="right">
+        <xacro:insert_block name="front_right_origin" />
+    </xacro:t200>
+    <xacro:t200 name="front_left" side="left">
+        <xacro:insert_block name="front_left_origin" />
+    </xacro:t200>
+    <xacro:t200 name="rear_right" side="right">
+        <xacro:insert_block name="rear_right_origin" />
+    </xacro:t200>
+    <xacro:t200 name="rear_left" side="left">
+        <xacro:insert_block name="rear_left_origin" />
+    </xacro:t200>
+    <xacro:t200 name="middle_right" side="right">
+        <xacro:insert_block name="middle_right_origin" />
+    </xacro:t200>
+    <xacro:t200 name="middle_left" side="left">
+        <xacro:insert_block name="middle_left_origin" />
+    </xacro:t200>
+
+    <!-- <link name="t200">
+        <visual>
+            <origin xyz="0 0 0" />
+            <geometry>
+                <sphere radius="0.02" />
+            </geometry>
+
+        </visual>
+        <visual>
+            <origin xyz="0 0 -0.07" />
+            <geometry>
+                <sphere radius="0.02" />
+            </geometry>
+
+        </visual>
+        <visual>
+            <origin xyz="0 0 -0.035" />
+            <geometry>
+                <cylinder length="0.07" radius="0.02" />
+            </geometry>
+
+        </visual>
+        <visual>
+            <origin xyz="0 0 -0.0225" />
+            <geometry>
+                <cylinder length="0.045" radius="0.045" />
+            </geometry>
+            <material name="blue" />
+        </visual>
+    </link> -->
+    <!-- <joint name="t200_joint" type="fixed">
+        <origin xyz="0 -0.22 0" />
+        <parent link="base_link" />
+        <child link="t200" />
+
+    </joint> -->
+</robot>
