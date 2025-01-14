@@ -1,12 +1,30 @@
+import rclpy
+from rclpy.node import Node
 from narval_thruster_manager.logger import Logger
 
 from geometry_msgs.msg import TransformStamped
+from geometry_msgs.msg import WrenchStamped
 
 import math
 import numpy as np
 
 class Thruster:
+    _id = 0
     def __init__(self, msg: TransformStamped):
+        super.__init__()
+
+        Thruster._id += 1
+        self.__id = Thruster._id
+
+        self.__node = rclpy.create_node(f"n_thruster_{self.__id}")
+        self.__node.declare_parameter("wrench_publisher_name", f"n_thruster_{self.__id}_wrench")
+
+        self.__wrench_publisher_name = self.__node.get_parameter("wrench_publisher_name").value
+
+        self.__pub_wrench = self.__node.create_publisher(WrenchStamped, self.__wrench_publisher_name, 0)
+
+        self.__force = .0
+
         self.frame = msg.header.frame_id
         self.joint = msg.child_frame_id
 
@@ -90,5 +108,36 @@ class Thruster:
                                 
         return rot_matrix
     
+    def update_force(self, f):
+        self.__force = f
+        self.__publish_wrench()
+
+    def get_force(self):
+        return self.__force
+
+    def get_wrench_msg(self):
+        wrench = WrenchStamped()
+        now = self.__node.get_clock().now()
+
+        wrench.header.frame_id = self.joint
+        wrench.header.stamp = now
+
+        wrench.wrench.force.x = self.__force
+        wrench.wrench.force.y = .0
+        wrench.wrench.force.z = .0
+
+        wrench.wrench.torque.x = .0
+        wrench.wrench.torque.y = .0
+        wrench.wrench.torque.z = .0
+
+        return wrench
+
+    def get_node(self) -> Node:
+        return self.__node
+
+    def __publish_wrench(self):
+        wrench = self.get_wrench_msg()
+        self.__pub_wrench.publish(wrench)
+
     def __str__(self):
         return f"Joint: {self.joint}; Frame: {self.frame}; Translation: {str(self.__trans)}"
