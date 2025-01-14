@@ -7,23 +7,35 @@ from geometry_msgs.msg import WrenchStamped
 
 import math
 import numpy as np
+from typing import Literal
+from enum import Enum
+
+ThrusterForceAxis = Literal['x', 'y', 'z']
 
 class Thruster:
     _id = 0
-    def __init__(self, msg: TransformStamped):
-        super.__init__()
+    def __init__(self, msg: TransformStamped, thruster_force_axis: ThrusterForceAxis = 'x' ,publish_wrench: bool = True, pub_wrench_name: str = "n_thruster_wrench"):
 
         Thruster._id += 1
         self.__id = Thruster._id
 
-        self.__node = rclpy.create_node(f"n_thruster_{self.__id}")
-        self.__node.declare_parameter("wrench_publisher_name", f"n_thruster_{self.__id}_wrench")
+        self.__do_publish_wrench = publish_wrench
 
-        self.__wrench_publisher_name = self.__node.get_parameter("wrench_publisher_name").value
+        if self.__do_publish_wrench:
+            self.__node = rclpy.create_node(f"n_thruster_{self.__id}")
 
-        self.__pub_wrench = self.__node.create_publisher(WrenchStamped, self.__wrench_publisher_name, 0)
+            self.__pub_wrench_name = f"{pub_wrench_name}_{self.__id}"
+
+            self.__pub_wrench = self.__node.create_publisher(WrenchStamped, self.__pub_wrench_name, 0)
 
         self.__force = .0
+
+        if thruster_force_axis == "x":
+            self.__thruster_force_axis = np.array([1, 0, 0])
+        elif thruster_force_axis == "y":
+            self.__thruster_force_axis = np.array([0, 1, 0])
+        else:
+            self.__thruster_force_axis = np.array([0, 0, 1])
 
         self.frame = msg.header.frame_id
         self.joint = msg.child_frame_id
@@ -110,7 +122,8 @@ class Thruster:
     
     def update_force(self, f):
         self.__force = f
-        self.__publish_wrench()
+        if self.__do_publish_wrench and self.__node:
+            self.__publish_wrench()
 
     def get_force(self):
         return self.__force
@@ -134,6 +147,9 @@ class Thruster:
 
     def get_node(self) -> Node:
         return self.__node
+
+    def get_thruster_force_axis(self):
+        return self.__thruster_force_axis
 
     def __publish_wrench(self):
         wrench = self.get_wrench_msg()
