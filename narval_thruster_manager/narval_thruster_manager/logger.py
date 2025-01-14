@@ -1,5 +1,5 @@
 import rclpy
-import  rclpy.logging
+import rclpy.logging
 
 class Logger(object):
     def __init__(self, module):
