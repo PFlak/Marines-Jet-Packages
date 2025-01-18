@@ -1,0 +1,8 @@
+n_thruster_manager:
+  ros__parameters:
+    thruster_prefix: t200
+    thruster_force_axis: 'z'
+
+    publish_thruster_wrench: True
+    thruster_wrench_publisher_name: n_thruster_wrench
+    sub_input_wrench_topic_name: joy_wrench_stmp

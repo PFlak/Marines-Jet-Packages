@@ -1,0 +1,149 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="narval">
+
+    <xacro:property name="PI" value="3.1415926535897931" />
+    <xacro:property name="RAD" value="${PI*2}" />
+
+    <xacro:property name="WIDTH" value="0.29" />
+    <xacro:property name="HEIGHT" value="0.22" />
+    <xacro:property name="LENGTH" value="0.662" />
+
+    <xacro:property name="MASS" value="11.51" />
+
+    <xacro:property name="CoG_X" value="0.03435" />
+    <xacro:property name="CoG_Y" value="0.001402" />
+    <xacro:property name="CoG_Z" value="0.00012" />
+
+    <xacro:property name="CoG" value="${CoG_X} ${CoG_Y} ${CoG_Z}" />
+
+    <xacro:property name="THRUSTER_ANGLE" value="${45 * PI / 180}" />
+
+    <xacro:property name="FRONT_THRUSTER_X" value="0.264"/>
+    <xacro:property name="FRONT_THRUSTER_Y" value="0.164"/>
+    <xacro:property name="FRONT_THRUSTER_Z" value="0.058"/>
+
+    <xacro:property name="MIDDLE_THRUSTER_X" value="0.0" />
+    <xacro:property name="MIDDLE_THRUSTER_Y" value="0.165" />
+    <xacro:property name="MIDDLE_THRUSTER_Z" value="0.023" />
+    
+    <xacro:property name="REAR_THRUSTER_X" value="-0.240" />
+    <xacro:property name="REAR_THRUSTER_Y" value="-0.167" />
+    <xacro:property name="REAR_THRUSTER_Z" value="-0.058" />
+
+
+    <material name="gray">
+        <color rgba="0.4 0.4 0.4 1.0" />
+    </material>
+    <material name="blue">
+        <color rgba="0 0 1 1" />
+    </material>
+    <material name="red">
+        <color rgba="1 0 0 1" />
+    </material>
+    <material name="black">
+        <color rgba="0.0 0.0 0.0 1.0" />
+    </material>
+
+    <!-- Thruster macro -->
+    <xacro:macro name="t200" params="side name *origin">
+        <xacro:property name="THRUSTER_X_OFFSET" value="0" />
+        <xacro:property name="THRUSTER_Y_OFFSET" value="0" />
+        <xacro:property name="THRUSTER_Z_OFFSET" value="0.025" />
+
+        <link name="t200_link_${name}">
+            <!-- Front cone -->
+            <visual>
+                <origin xyz="${THRUSTER_X_OFFSET} ${THRUSTER_Y_OFFSET} ${THRUSTER_Z_OFFSET}" />
+                <geometry>
+                    <sphere radius="0.02" />
+                </geometry>
+                <material name="blue" />
+                <!-- All visual elements in this link pick up this material -->
+            </visual>
+            <!-- Rear cone -->
+            <visual>
+                <origin xyz="${THRUSTER_X_OFFSET} ${THRUSTER_Y_OFFSET} ${THRUSTER_Z_OFFSET -0.07}" />
+                <geometry>
+                    <sphere radius="0.02" />
+                </geometry>
+            </visual>
+            <!-- Thruster body -->
+            <visual>
+                <origin xyz="${THRUSTER_X_OFFSET} ${THRUSTER_Y_OFFSET} ${THRUSTER_Z_OFFSET -0.035}" />
+                <geometry>
+                    <cylinder length="0.07" radius="0.02" />
+                </geometry>
+            </visual>
+            <!-- Propeller guard -->
+            <visual>
+                <origin xyz="${THRUSTER_X_OFFSET} ${THRUSTER_Y_OFFSET} ${THRUSTER_Z_OFFSET -0.0225}" />
+                <geometry>
+                    <cylinder length="0.045" radius="0.045" />
+                </geometry>
+            </visual>
+        </link>
+        <joint name="t200_joint_${name}" type="fixed">
+            <xacro:insert_block name="origin" />
+            <parent link="base_link" />
+            <child link="t200_link_${name}" />
+        </joint>
+    </xacro:macro>
+
+    <!-- Thruster origins-->
+    <xacro:property name="front_right_origin">
+        <origin xyz="${FRONT_THRUSTER_X + CoG_X} ${FRONT_THRUSTER_Y + CoG_Y} ${FRONT_THRUSTER_Z + CoG_Z}" rpy="${THRUSTER_ANGLE} 0 0" />
+    </xacro:property>
+    <xacro:property name="front_left_origin">
+        <origin xyz="${FRONT_THRUSTER_X + CoG_X} ${-FRONT_THRUSTER_Y + CoG_Y} ${FRONT_THRUSTER_Z + CoG_Z}" rpy="${-THRUSTER_ANGLE} 0 0" />
+    </xacro:property>
+    <xacro:property name="middle_right_origin">
+        <origin xyz="${MIDDLE_THRUSTER_X + CoG_X} ${MIDDLE_THRUSTER_Y + CoG_Y} ${MIDDLE_THRUSTER_Z + CoG_Z}" rpy="0 ${RAD/4} 0" />
+    </xacro:property>
+    <xacro:property name="middle_left_origin">
+        <origin xyz="${MIDDLE_THRUSTER_X + CoG_X} ${-MIDDLE_THRUSTER_Y + CoG_Y} ${MIDDLE_THRUSTER_Z + CoG_Z}" rpy="0 ${RAD/4} 0" />
+    </xacro:property>
+    <xacro:property name="rear_right_origin">
+        <origin xyz="${REAR_THRUSTER_X + CoG_X} ${REAR_THRUSTER_Y + CoG_Y} ${REAR_THRUSTER_Z + CoG_Z}" rpy="${THRUSTER_ANGLE} 0 0" />
+    </xacro:property>
+    <xacro:property name="rear_left_origin">
+        <origin xyz="${REAR_THRUSTER_X + CoG_X} ${-REAR_THRUSTER_Y + CoG_Y} ${REAR_THRUSTER_Z + CoG_Z}" rpy="${-THRUSTER_ANGLE} 0 0" />
+    </xacro:property>
+
+    <link name="base_link">
+        <visual>
+            <origin xyz="${CoG}" rpy="-${PI/2} 0 0"/>
+            <geometry>
+                <mesh filename="package://narval_description/meshes/narval_base.dae" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="gray" />
+        </visual>
+        <inertial>
+            <mass value="${MASS}" />
+            <origin xyz="${CoG}" rpy="0 0 0" />
+            <inertia ixx="173259.753" ixy="0" ixz="0"
+                     iyy="525524.955" iyz="0"
+                     izz="458185.246" />
+        </inertial>
+    </link>
+
+    <!-- Attach thrusters to the base_link -->
+    <xacro:t200 name="front_right" side="right">
+        <xacro:insert_block name="front_right_origin" />
+    </xacro:t200>
+    <xacro:t200 name="front_left" side="left">
+        <xacro:insert_block name="front_left_origin" />
+    </xacro:t200>
+    <xacro:t200 name="rear_right" side="right">
+        <xacro:insert_block name="rear_right_origin" />
+    </xacro:t200>
+    <xacro:t200 name="rear_left" side="left">
+        <xacro:insert_block name="rear_left_origin" />
+    </xacro:t200>
+    <xacro:t200 name="middle_right" side="right">
+        <xacro:insert_block name="middle_right_origin" />
+    </xacro:t200>
+    <xacro:t200 name="middle_left" side="left">
+        <xacro:insert_block name="middle_left_origin" />
+    </xacro:t200>
+
+</robot>

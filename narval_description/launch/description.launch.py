@@ -11,7 +11,7 @@ def generate_launch_description():
         ld = LaunchDescription()
         ld.add_action(DeclareLaunchArgument('urdf_file_name',
                                             description="file of the urdf description", 
-                                            default_value="simplified_narval.urdf.xacro"))
+                                            default_value="narval_base.urdf.xacro"))
         
         package_dir = FindPackageShare("narval_description")
         urdf_file = PathJoinSubstitution([package_dir, LaunchConfiguration('urdf_file_name')])

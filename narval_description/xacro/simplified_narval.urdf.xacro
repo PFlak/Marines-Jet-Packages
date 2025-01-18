@@ -8,7 +8,8 @@
     <xacro:property name="HEIGHT" value="0.22" />
     <xacro:property name="LENGTH" value="0.662" />
 
-    <xacro:property name="THRUSTER_ANGLE" value="${0.1*RAD}" />
+    <xacro:property name="SET_ANGLE" value="45"/>
+    <xacro:property name="THRUSTER_ANGLE" value="${SET_ANGLE * PI/180}" />
     <xacro:property name="MIDDLE_THRUSTER_Z" value="0.1" />
 
     <material name="gray">
@@ -110,22 +111,22 @@
     </link>
 
     <!-- Attach thrusters to the base_link -->
-    <xacro:t200 name="front_right" side="right">
+    <xacro:t200 name="front_right" side="none">
         <xacro:insert_block name="front_right_origin" />
     </xacro:t200>
-    <xacro:t200 name="front_left" side="left">
+    <xacro:t200 name="front_left" side="none">
         <xacro:insert_block name="front_left_origin" />
     </xacro:t200>
-    <xacro:t200 name="rear_right" side="right">
+    <xacro:t200 name="rear_right" side="none">
         <xacro:insert_block name="rear_right_origin" />
     </xacro:t200>
-    <xacro:t200 name="rear_left" side="left">
+    <xacro:t200 name="rear_left" side="none">
         <xacro:insert_block name="rear_left_origin" />
     </xacro:t200>
-    <xacro:t200 name="middle_right" side="right">
+    <xacro:t200 name="middle_right" side="none">
         <xacro:insert_block name="middle_right_origin" />
     </xacro:t200>
-    <xacro:t200 name="middle_left" side="left">
+    <xacro:t200 name="middle_left" side="none">
         <xacro:insert_block name="middle_left_origin" />
     </xacro:t200>
 
