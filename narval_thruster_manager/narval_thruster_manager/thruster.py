@@ -1,3 +1,15 @@
+"""
+Thruster Class
+==============
+
+The `Thruster` class represents a robotic thruster, allowing management of its transformation, force application, and wrench publishing.
+
+Attributes
+----------
+_id : int
+    Class-level variable used to assign unique IDs to thrusters.
+"""
+
 import rclpy
 from rclpy.node import Node
 from narval_thruster_manager.logger import Logger
@@ -11,8 +23,28 @@ import tf_transformations as tf
  
 
 class Thruster:
+    """
+    Represents a thruster in a robotic system.
+
+    :param msg: The transform of the thruster, including translation and rotation.
+    :type msg: TransformStamped
+    :param thruster_force_axis: The axis along which the thruster applies force ('x', 'y', or 'z'), defaults to 'x'.
+    :type thruster_force_axis: str, optional
+    :param publish_wrench: Whether to publish wrench messages for this thruster, defaults to True.
+    :type publish_wrench: bool, optional
+    :param pub_wrench_name: The base name of the wrench topic to publish, defaults to 'n_thruster_wrench'.
+    :type pub_wrench_name: str, optional
+    :param logger: Logger instance for logging messages. If None, a new logger is created, defaults to None.
+    :type logger: Logger, optional
+    :param node: ROS2 node for publishing and subscribing. If None, a new node is created, defaults to None.
+    :type node: Node, optional
+    """
+        
     _id = 0
     def __init__(self, msg: TransformStamped, thruster_force_axis = "x" ,publish_wrench: bool = True, pub_wrench_name: str = "n_thruster_wrench", logger = None, node = None):
+        """
+        Initializes the Thruster object with a unique ID, transformation data, force axis, and ROS2 publishers.
+        """
         if logger:
             self.__logger = logger
         else:
@@ -96,23 +128,47 @@ class Thruster:
         return __rot_euler
     
     def get_translation_np_array(self):
+        """
+        Returns the translation vector of the thruster.
+
+        :return: The translation vector as a NumPy array [x, y, z].
+        :rtype: np.ndarray
+        """
+
         return np.array([self.__trans['x'],
                          self.__trans['y'],
                          self.__trans['z']])
     
     def get_quaternion_rot_np_array(self):
+        """
+        Returns the rotation quaternion of the thruster.
+
+        :return: The quaternion as a NumPy array [x, y, z, w].
+        :rtype: np.ndarray
+        """
         return np.array([self.__rot_quaternion['x'],
                          self.__rot_quaternion['y'],
                          self.__rot_quaternion['z'],
                          self.__rot_quaternion['w']])
     
     def get_euler_rot_np_array(self):
+        """
+        Returns the Euler angles of the thruster.
+
+        :return: The Euler angles as a NumPy array [roll, pitch, yaw].
+        :rtype: np.ndarray
+        """
         return np.array([self.__rot_euler['roll'],
                          self.__rot_euler['pitch'],
                          self.__rot_euler['yaw']])
     
     def get_quaternion_rotation_matrix(self):
+        """
+        Calculates and returns the quaternion rotation matrix.
 
+        :return: The 3x3 rotation matrix.
+        :rtype: np.ndarray
+        """
         # Extract the values
         q0 = self.__rot_quaternion['w']
         q1 = self.__rot_quaternion['x']
@@ -142,14 +198,34 @@ class Thruster:
         return rot_matrix
     
     def update_force(self, f):
+        """
+        Updates the force applied by the thruster.
+
+        :param f: The new force value to apply.
+        :type f: float
+        """
         self.__force = f
         if self.__do_publish_wrench and self.__node:
             self.__publish_wrench()
 
     def get_force(self):
+        """
+        Returns the current force applied by the thruster.
+
+        :return: The current force value.
+        :rtype: float
+        """
+
         return self.__force
 
     def get_wrench_msg(self):
+        """
+        Creates a WrenchStamped message for the thruster.
+
+        :return: The wrench message with force and torque data.
+        :rtype: WrenchStamped
+        """
+
         wrench = WrenchStamped()
         now = self.__node.get_clock().now()
 
@@ -170,9 +246,23 @@ class Thruster:
         return wrench
 
     def get_node(self) -> Node:
+        """
+        Returns the ROS2 node associated with the thruster.
+
+        :return: The ROS2 node.
+        :rtype: Node
+        """
+                
         return self.__node
 
     def get_thruster_force_axis(self):
+        """
+        Returns the thruster force axis in the world frame.
+
+        :return: The force axis vector as a NumPy array [x, y, z].
+        :rtype: np.ndarray
+        """
+
         q = (self.__rot_quaternion['x'],
              self.__rot_quaternion['y'],
              self.__rot_quaternion['z'], 

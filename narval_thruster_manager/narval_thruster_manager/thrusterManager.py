@@ -1,3 +1,37 @@
+"""
+Thruster Manager
+================
+
+The `ThrusterManager` class manages thrusters in a robotic system, subscribes to transformation data, and 
+allocates forces and torques to the thrusters using a `ThrusterAllocationMatrix`. It interfaces with ROS2 nodes
+for parameter configuration, subscriptions, and logging.
+
+Attributes
+----------
+__node : Node
+    The ROS2 node associated with the thruster manager.
+__logger : Logger
+    Logger instance for logging thruster manager events and errors.
+thrusters : list[Thruster]
+    List of thrusters managed by the Thruster Manager.
+TAMManager : ThrusterAllocationMatrix
+    Manages the Thruster Allocation Matrix (TAM) for force and torque distribution.
+param_thruster_prefix : str
+    Prefix used to identify thruster transforms.
+param_thruster_force_axis : str
+    Axis along which the thruster generates force (e.g., 'x', 'y', or 'z').
+param_publish_thruster_wrench : bool
+    Whether to publish the wrench (force and torque) for each thruster.
+param_thruster_wrench_publisher_name : str
+    Name of the topic where thruster wrench messages are published.
+param_sub_input_wrench_topic_name : str
+    Name of the topic where input wrench messages are subscribed.
+sub_tf_static : Subscription
+    Subscription to the "tf_static" topic for thruster transform data.
+sub_input_wrench : Subscription
+    Subscription to the input wrench topic.
+"""
+
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSHistoryPolicy, QoSProfile
@@ -11,8 +45,18 @@ from narval_thruster_manager.thrusterAllocationMatrix import ThrusterAllocationM
 from narval_thruster_manager.logger import Logger
 
 class ThrusterManager:
+    """
+    Handles thruster discovery, management, and force allocation using ROS2.
+
+    :param node: The ROS2 node that initializes the ThrusterManager.
+    :type node: Node
+    """
+
     def __init__(self, node: Node):
-        
+        """
+        Initializes the ThrusterManager, declares parameters, and sets up subscriptions.
+        """
+
         self.__node = node
         self.__logger = self.__node.get_logger().set_level(LoggingSeverity.INFO)
 
@@ -39,6 +83,16 @@ class ThrusterManager:
         self.TAMManager = ThrusterAllocationMatrix(node=self.__node, logger=self.__logger)
 
     def cb_tf_static(self, msg: TFMessage):
+        """
+        Callback for the "tf_static" topic, responsible for discovering thrusters.
+
+        Parses the static transforms and adds thrusters whose child frame ID matches the specified prefix.
+        Also initializes the Thruster Allocation Matrix (TAM) if enough thrusters are found.
+
+        :param msg: Message containing static transforms.
+        :type msg: TFMessage
+        """
+
         transforms = msg.transforms
 
         error_rate = 0
@@ -78,6 +132,16 @@ class ThrusterManager:
 
 
     def cb_input_wrench(self, msg: WrenchStamped):
+        """
+        Callback for the input wrench topic, responsible for solving the Thruster Allocation Matrix (TAM).
+
+        Allocates forces and torques to the thrusters based on the desired wrench. If fewer than six thrusters
+        are configured, this method does nothing.
+
+        :param msg: Desired wrench (forces and torques) for the thrusters to achieve.
+        :type msg: WrenchStamped
+        """
+
         if len(self.TAMManager.get_thrusters()) < 6:
             return
         self.TAMManager.solve_wrench(msg)
