@@ -19,7 +19,7 @@ class CameraManager(Node):
         self.cameras = []
         self.load_camera()
         for i, cam_id in enumerate(self.avaiable):
-            self.create_camera_node(f"Camera{i}", cam_id)
+            self.create_camera_node(str(i), cam_id)
         print(self.cameras)
         self.get_camera_list_srv = self.create_service(CameraList, 'CameraList', self.get_camera_list)
 
@@ -32,7 +32,7 @@ class CameraManager(Node):
             -p image_size:="[{width},{height}]" \\
             -p camera_frame_id:=camera_optical_link \\
             -p video_device:="/dev/video{id}" \\
-            -r __ns:="/{name}" & 
+            -r __ns:="/camera{name}" & 
         ''')
         self.cameras.append(f"camera{name}")
 
