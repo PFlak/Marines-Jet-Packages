@@ -5,6 +5,7 @@ import rclpy
 import cv2
 from rclpy.node import Node
 from rclpy.node import HIDDEN_NODE_PREFIX
+from custom_interfaces.srv import CameraList
 
 NodeName = namedtuple('NodeName', ('name', 'namespace', 'full_name'))
 MAX_CAMERAS = 10
@@ -17,10 +18,10 @@ class CameraManager(Node):
         self.avaiable = []
         self.cameras = []
         self.load_camera()
-        print(self.avaiable)
         for i, cam_id in enumerate(self.avaiable):
             self.create_camera_node(f"Camera{i}", cam_id)
-
+        print(self.cameras)
+        self.get_camera_list_srv = self.create_service(CameraList, 'CameraList', self.get_camera_list)
 
     def create_camera_node(self, name: str, id: int, width: int = 640, height: int = 480):
         if f"camera{name}" in self.cameras:
@@ -45,6 +46,11 @@ class CameraManager(Node):
 
             self.avaiable.append(i)
             cap.release()
+
+    def get_camera_list(self, request, response):
+        response.list = self.cameras
+        return response
+
 
 def main(args=None):
     rclpy.init(args=args)
