@@ -117,13 +117,13 @@
             </geometry>
             <material name="gray" />
         </visual>
-        <inertial>
+        <!-- <inertial>
             <mass value="${MASS}" />
             <origin xyz="${CoG}" rpy="0 0 0" />
             <inertia ixx="173259.753" ixy="0" ixz="0"
                      iyy="525524.955" iyz="0"
                      izz="458185.246" />
-        </inertial>
+        </inertial> -->
     </link>
 
     <!-- Attach thrusters to the base_link -->

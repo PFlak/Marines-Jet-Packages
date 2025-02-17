@@ -50,7 +50,7 @@ def generate_launch_description():
     )
 
     # Timed actions
-    description_timer = TimerAction(period=0.5, actions=[description_launch])
+    description_timer = TimerAction(period=1.0, actions=[description_launch])
     rviz_timer = TimerAction(period=1.0, actions=[rviz_node])
 
     # Combine into launch description
