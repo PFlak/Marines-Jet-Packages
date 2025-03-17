@@ -15,7 +15,8 @@ setup(
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch','*launch.py*'))),
         (os.path.join('share', package_name, 'nodes'), glob(os.path.join('nodes', '*node.py*'))),
         (os.path.join('share', package_name, 'config'), glob(os.path.join('config', '*.yaml*'))),
-        (os.path.join('share', package_name, 'rviz'), glob(os.path.join('rviz', '*.rviz*')))
+        (os.path.join('share', package_name, 'rviz'), glob(os.path.join('rviz', '*.rviz*'))),
+        (os.path.join('share', package_name, 'data'), glob(os.path.join('data', '*.txt*'))),
     ],
     install_requires=['setuptools', 'python3-numpy'],
     zip_safe=True,

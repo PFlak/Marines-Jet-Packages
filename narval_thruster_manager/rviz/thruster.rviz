@@ -68,22 +68,32 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        t200_link_dive_front_left:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        t200_link_dive_front_right:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        t200_link_dive_rear_left:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        t200_link_dive_rear_right:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         t200_link_front_left:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
         t200_link_front_right:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        t200_link_middle_left:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        t200_link_middle_right:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -285,7 +295,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 3.441779851913452
+      Distance: 2.3175384998321533
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -300,10 +310,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.44539815187454224
+      Pitch: 0.2653989791870117
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.850393772125244
+      Yaw: 1.7803901433944702
     Saved: ~
 Window Geometry:
   Displays:
@@ -321,5 +331,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1432
-  X: 2041
+  X: 2630
   Y: 101

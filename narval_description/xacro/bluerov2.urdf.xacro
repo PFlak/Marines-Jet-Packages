@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="bluerov2">
+
+  <!-- Materials -->
+  <xacro:macro name="material_bodies">
+    <material name="Fiberglass">
+      <color rgba="1.0 1.0 1.0 1.0"/>
+    </material>
+    <material name="Neutral">
+      <color rgba="0.8 0.8 0.8 1.0"/>
+    </material>
+    <material name="Steel">
+      <color rgba="0.5 0.5 0.5 1.0"/>
+    </material>
+    <material name="Black">
+      <color rgba="0.0 0.0 0.0 1.0"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:material_bodies/>
+
+  <xacro:property name="PI" value="3.1415926535897931"/>
+  <xacro:property name="RAD" value="${PI*2}"/>
+  <xacro:property name="WIDTH" value="0.29"/>
+  <xacro:property name="HEIGHT" value="0.22"/>
+  <xacro:property name="LENGTH" value="0.662"/>
+  <xacro:property name="MASS" value="11.51"/>
+  <xacro:property name="CoG_X" value="0.03435"/>
+  <xacro:property name="CoG_Y" value="0.001402"/>
+  <xacro:property name="CoG_Z" value="0.00012"/>
+  <xacro:property name="CoG" value="${CoG_X} ${CoG_Y} ${CoG_Z}"/>
+
+  <!-- Thruster macro -->
+  <xacro:macro name="t200" params="side name *origin">
+    <link name="t200_link_${name}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://narval_description/meshes/cw.obj" scale="1 1 1"/>
+        </geometry>
+      </visual>
+    </link>
+    <joint name="t200_joint_${name}" type="fixed">
+      <xacro:insert_block name="origin"/>
+      <parent link="base_link"/>
+      <child link="t200_link_${name}"/>
+    </joint>
+  </xacro:macro>
+
+  <link name="base_link">
+    <visual>
+      <origin xyz="0.0 0.0 0.0" rpy="${PI} 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://narval_description/meshes/bluerov2.obj" scale="1 1 1"/>
+      </geometry>
+      <material name="Fiberglass"/>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="${PI} 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://narval_description/meshes/bluerov2_phy.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0.0 0.0 0.03" rpy="${PI} 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://narval_description/meshes/bluerov2_wings.obj" scale="1 1 1"/>
+      </geometry>
+      <material name="Black"/>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.0 0.03" rpy="${PI} 0.0 0.0"/>
+      <geometry>
+        <mesh filename="package://narval_description/meshes/bluerov2_ring.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Thruster origins -->
+  <xacro:property name="front_right_origin">
+    <!-- <origin xyz="0.1355 0.1 0.0725" rpy="0 0 -0.7853981634"/> -->
+    <origin xyz="0.1355 0.1 -0.0725" rpy="${PI} 0 -0.7853981634"/>
+
+  </xacro:property>
+  <xacro:property name="front_left_origin">
+    <!-- <origin xyz="0.1355 -0.1 0.0725" rpy="0 0 0.7853981634"/> -->
+    <origin xyz="0.1355 -0.1 -0.0725" rpy="${PI} 0 0.7853981634"/>
+
+  </xacro:property>
+  <xacro:property name="rear_right_origin">
+    <!-- <origin xyz="-0.1475 0.1 0.0725" rpy="0 0 -2.3561944902"/> -->
+    <origin xyz="-0.1475 0.1 -0.0725" rpy="${PI} 0 -2.3561944902"/>
+
+  </xacro:property>
+  <xacro:property name="rear_left_origin">
+    <!-- <origin xyz="-0.1475 -0.1 0.0725" rpy="0 0 2.3561944902"/> -->
+    <origin xyz="-0.1475 -0.1 -0.0725" rpy="${PI} 0 2.3561944902"/>
+
+  </xacro:property>
+  <xacro:property name="dive_front_right_origin">
+    <!-- <origin xyz="0.12 0.218 0.0" rpy="0 -1.5707963268 0"/> -->
+    <origin xyz="0.12 0.218 0.0" rpy="${PI} -1.5707963268 0"/>
+
+  </xacro:property>
+  <xacro:property name="dive_front_left_origin">
+    <!-- <origin xyz="0.12 -0.218 0.0" rpy="0 -1.5707963268 0"/> -->
+    <origin xyz="0.12 -0.218 0.0" rpy="${PI} -1.5707963268 0"/>
+
+  </xacro:property>
+  <xacro:property name="dive_rear_right_origin">
+    <!-- <origin xyz="-0.12 0.218 0.0" rpy="0 -1.5707963268 0"/> -->
+    <origin xyz="-0.12 0.218 0.0" rpy="${PI} -1.5707963268 0"/>
+
+  </xacro:property>
+  <xacro:property name="dive_rear_left_origin">
+    <!-- <origin xyz="-0.12 -0.218 0.0" rpy="0 -1.5707963268 0"/> -->
+    <origin xyz="-0.12 -0.218 0.0" rpy="${PI} -1.5707963268 0"/>
+
+  </xacro:property>
+
+  <!-- Attach thrusters to the base_link -->
+  <xacro:t200 name="t1" side="right">
+    <xacro:insert_block name="front_right_origin"/>
+  </xacro:t200>
+  <xacro:t200 name="t2" side="left">
+    <xacro:insert_block name="front_left_origin"/>
+  </xacro:t200>
+  <xacro:t200 name="t3" side="right">
+    <xacro:insert_block name="rear_right_origin"/>
+  </xacro:t200>
+  <xacro:t200 name="t4" side="left">
+    <xacro:insert_block name="rear_left_origin"/>
+  </xacro:t200>
+  <xacro:t200 name="t5" side="right">
+    <xacro:insert_block name="dive_front_right_origin"/>
+  </xacro:t200>
+  <xacro:t200 name="t6" side="left">
+    <xacro:insert_block name="dive_front_left_origin"/>
+  </xacro:t200>
+  <xacro:t200 name="t7" side="right">
+    <xacro:insert_block name="dive_rear_right_origin"/>
+  </xacro:t200>
+  <xacro:t200 name="t8" side="left">
+    <xacro:insert_block name="dive_rear_left_origin"/>
+  </xacro:t200>
+
+</robot>

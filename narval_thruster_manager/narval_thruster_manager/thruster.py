@@ -9,18 +9,23 @@ Attributes
 _id : int
     Class-level variable used to assign unique IDs to thrusters.
 """
+from typing import Literal
 
 import rclpy
 from rclpy.node import Node
 from narval_thruster_manager.logger import Logger
+from narval_thruster_manager.coefficient import Coefficient
 
 from geometry_msgs.msg import TransformStamped
 from geometry_msgs.msg import WrenchStamped
 from geometry_msgs.msg import Transform
+from std_msgs.msg import Float64
 import math
 import numpy as np
 import tf_transformations as tf
- 
+
+
+ThrusterOutputType = Literal['SEP_WRENCH', 'SEP_FRC', 'SEP_PWM', 'SEP_RPM']
 
 class Thruster:
     """
@@ -41,7 +46,15 @@ class Thruster:
     """
         
     _id = 0
-    def __init__(self, msg: TransformStamped, thruster_force_axis = "x" ,publish_wrench: bool = True, pub_wrench_name: str = "n_thruster_wrench", logger = None, node = None):
+
+    def __init__(self,
+                 msg: TransformStamped,
+                 thruster_force_axis = "x",
+                 publish_wrench_type: ThrusterOutputType = 'SEP_WRENCH',
+                 pub_wrench_name: str = "n_thruster_wrench",
+                 coefficient: Coefficient = None,
+                 logger = None,
+                 node = None):
         """
         Initializes the Thruster object with a unique ID, transformation data, force axis, and ROS2 publishers.
         """
@@ -50,31 +63,29 @@ class Thruster:
         else:
             self.__logger = Logger("Thruster")
 
+        self.publish_wrench_type = publish_wrench_type
         try:
             Thruster._id += 1
             self.__id = Thruster._id
 
-            self.__do_publish_wrench = publish_wrench
+            self.__do_publish_wrench = 'SEP' in publish_wrench_type.upper()
 
             if self.__do_publish_wrench:
                 if node:
                     self.__node = node
                 else:
-                    self.__node = rclpy.create_node(f"some_node_{self.__id}")
+                    self.__node = rclpy.create_node(f"thruster_node_{self.__id}")
 
-                self.__pub_wrench_name = f"{pub_wrench_name}_{self.__id}"
 
-                self.__pub_wrench = self.__node.create_publisher(WrenchStamped, self.__pub_wrench_name, 0)
+                if publish_wrench_type == 'SEP_WRENCH':
+                    self.__pub_wrench_name = f"{pub_wrench_name}_{self.__id}"
+                    self.__pub_wrench = self.__node.create_publisher(WrenchStamped, self.__pub_wrench_name, 0)
+                elif 'SEP' in publish_wrench_type:
+                    self.__pub_wrench_name = f"{pub_wrench_name}_{self.__id}"
+                    self.__pub_wrench = self.__node.create_publisher(Float64, self.__pub_wrench_name , 0)
 
-                try:
-                    if self.__pub_wrench:
-                        test_wrench = WrenchStamped()
-                        self.__pub_wrench.publish(test_wrench)
-                        self.__logger.info(f'Succesfully created topic: {self.__pub_wrench_name}')
-                    else:
-                        self.__logger.error(f"Could not create topic: {self.__pub_wrench_name}")
-                except Exception as e:
-                    self.__logger.error(f"Could not create topic: {self.__pub_wrench_name}\nError: {e}")
+
+
 
 
             self.__force = .0
@@ -108,6 +119,9 @@ class Thruster:
 
         self.__logger.info(f"Thruster found: {self}")
 
+        self._coefficient = coefficient
+        
+
     def __quaternion_to_euler(self):
         
         q = self.__rot_quaternion
@@ -127,7 +141,8 @@ class Thruster:
 
         return __rot_euler
     
-    def get_translation_np_array(self):
+    @property
+    def translation_np_array(self):
         """
         Returns the translation vector of the thruster.
 
@@ -139,7 +154,8 @@ class Thruster:
                          self.__trans['y'],
                          self.__trans['z']])
     
-    def get_quaternion_rot_np_array(self):
+    @property
+    def quaternion_rot_np_array(self):
         """
         Returns the rotation quaternion of the thruster.
 
@@ -151,7 +167,8 @@ class Thruster:
                          self.__rot_quaternion['z'],
                          self.__rot_quaternion['w']])
     
-    def get_euler_rot_np_array(self):
+    @property
+    def euler_rot_np_array(self):
         """
         Returns the Euler angles of the thruster.
 
@@ -162,7 +179,8 @@ class Thruster:
                          self.__rot_euler['pitch'],
                          self.__rot_euler['yaw']])
     
-    def get_quaternion_rotation_matrix(self):
+    @property
+    def quaternion_rotation_matrix(self):
         """
         Calculates and returns the quaternion rotation matrix.
 
@@ -208,7 +226,8 @@ class Thruster:
         if self.__do_publish_wrench and self.__node:
             self.__publish_wrench()
 
-    def get_force(self):
+    @property
+    def force(self):
         """
         Returns the current force applied by the thruster.
 
@@ -217,8 +236,10 @@ class Thruster:
         """
 
         return self.__force
+    
 
-    def get_wrench_msg(self):
+    @property
+    def wrench_msg(self):
         """
         Creates a WrenchStamped message for the thruster.
 
@@ -245,7 +266,8 @@ class Thruster:
 
         return wrench
 
-    def get_node(self) -> Node:
+    @property
+    def node(self) -> Node:
         """
         Returns the ROS2 node associated with the thruster.
 
@@ -255,7 +277,8 @@ class Thruster:
                 
         return self.__node
 
-    def get_thruster_force_axis(self):
+    @property
+    def thruster_force_axis(self):
         """
         Returns the thruster force axis in the world frame.
 
@@ -270,8 +293,22 @@ class Thruster:
         return np.array(self.__qv_mult(q, self.__thruster_force_axis))
 
     def __publish_wrench(self):
-        wrench = self.get_wrench_msg()
-        self.__pub_wrench.publish(wrench)
+        wrench = self.wrench_msg
+
+        if self.publish_wrench_type == 'SEP_WRENCH':
+            self.__pub_wrench.publish(wrench)
+        elif self.publish_wrench_type == 'SEP_FRC': 
+            force_msg = Float64()
+            force_msg.data = self.__force
+            self.__pub_wrench.publish(force_msg)
+        elif self.publish_wrench_type == 'SEP_RPM': 
+            rpm_msg = Float64()
+            rpm_msg.data = self._coefficient.calc('RPM', self.__force)
+            self.__pub_wrench.publish(rpm_msg)
+        elif self.publish_wrench_type == 'SEP_PWM':
+            pwm_msg = Float64()
+            pwm_msg.data = self._coefficient.calc('PWM', self.__force)
+            self.__pub_wrench.publish(pwm_msg)
 
     @staticmethod
     def __qv_mult(q1, v1):

@@ -8,21 +8,23 @@ from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
-        ld = LaunchDescription()
-        ld.add_action(DeclareLaunchArgument('urdf_file_name',
-                                            description="file of the urdf description", 
-                                            default_value="narval_base.urdf.xacro"))
-        
-        package_dir = FindPackageShare("narval_description")
-        urdf_file = PathJoinSubstitution([package_dir, LaunchConfiguration('urdf_file_name')])
+        description_share = FindPackageShare('narval_description')
 
-        robot_description_content = ParameterValue(Command(command=['xacro ', urdf_file]), value_type=str)
+        default_config_path = PathJoinSubstitution([description_share, 'config', 'params.yaml'])
 
-        robot_state_publisher_node = Node(package="robot_state_publisher",
-                                          executable="robot_state_publisher",
-                                          parameters=[{
-                                                  "robot_description": robot_description_content,
-                                          }])
-        
-        ld.add_action(robot_state_publisher_node)
-        return ld
+        config_arg = DeclareLaunchArgument(
+                name="config",
+                default_value=default_config_path,
+                description="Path to the configuration file for the narval state publisher"
+        )
+
+        narval_state_publisher_node = Node(
+                package='narval_description',
+                executable='narval_state_publisher',
+                parameters=[LaunchConfiguration('config')]
+        )
+
+        return LaunchDescription([
+                config_arg,
+                narval_state_publisher_node
+        ])

@@ -1,8 +1,81 @@
+n_state_publisher:
+  ros__parameters:
+    robot_name: bluerov2
+
 n_thruster_manager:
   ros__parameters:
     thruster_prefix: t200
-    thruster_force_axis: 'z'
 
-    publish_thruster_wrench: True
+    # Thruster Force Axis
+    #
+    # Axis of the thruster force. Used only for visualization purposes
+    thruster_force_axis: 'x'
+
     thruster_wrench_publisher_name: n_thruster_wrench
+
+    # Sub Input Wrench Topic Name
+    #
+    # Name of the topic where the input wrench is published
+    #
     sub_input_wrench_topic_name: joy_wrench_stmp
+
+    # Output Type:
+    #
+    #
+    # Parameters:
+    #   PWM     - one public topic with list of pwm values for thrusters set up on 
+    #   SEP_PWM - every Thruster creates topic with pwm value
+    #   RPM     - one public topic with list of rpm values for thrusters
+    #   SEP_RPM - every Thruster creates topic with rpm value
+    #   FRC     - one public topic with list of force values for thrusters
+    #   SEP_FRC - every Thruster creates topic with rpm value
+    #   SEP_WRENCH
+    #   STONEFISH - normalized values for stonefish
+    #
+    #  Order of thrusters is sorted alphabetically
+    output_type: 'SEP_WRENCH'
+
+    # Thruster Voltage
+    #
+    # Possible values:
+    #   10
+    #   12
+    #   14
+    #   16
+    #   18
+    #   20
+    thruster_voltage: 20
+
+n_wrench_system_base:
+  ros__parameters:
+    controller: "ds4"
+
+    wrench_topic_name: "joy_wrench"
+    wrench_stamped_topic_name: "joy_wrench_stmp"
+
+    send_stamped: True
+    frame_id: base_link
+
+    max_force: 2.0
+    max_torque: 0.5
+
+    equalization_type: "square"
+
+    ds4_force_x: axis_left_y
+    ds4_force_y: axis_left_x
+    ds4_force_z: axis_right_y
+
+    ds4_torque_x: axis_right_x
+    ds4_torque_y: None
+    ds4_torque_z: None
+
+    inv_force_x: False
+    inv_force_y: True
+    inv_force_z: False
+
+    inv_torque_x: True
+    inv_torque_y: False
+    inv_torque_z: True
+
+
+
