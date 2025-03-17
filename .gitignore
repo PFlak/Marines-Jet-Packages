@@ -51,3 +51,5 @@ qtcreator-*
 CATKIN_IGNORE
 
 .idea
+
+narval_stonefish/
