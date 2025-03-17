@@ -34,23 +34,29 @@ def generate_launch_description():
         output="screen"
     )
 
-    description_launch = IncludeLaunchDescription(
-        PathJoinSubstitution([description_share, "launch", "description.launch.py"])
+    narval_state_publisher_node = Node(
+        package='narval_description',
+        executable='narval_state_publisher',
+        parameters=[LaunchConfiguration('config')]
     )
 
     wrench_system_launch = IncludeLaunchDescription(
-        PathJoinSubstitution([wrench_system_share, 'launch', 'base.launch.py'])
+        launch_description_source=PathJoinSubstitution([wrench_system_share, 'launch', 'base.launch.py']),
+        launch_arguments={
+            "config": LaunchConfiguration('config')
+        }.items()
     )
 
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
-        output='screen',
-        arguments=['-d', LaunchConfiguration('rviz_config')]
+        arguments=['-d', LaunchConfiguration('rviz_config')],
+        output='screen'
     )
 
+
     # Timed actions
-    description_timer = TimerAction(period=1.0, actions=[description_launch])
+    description_timer = TimerAction(period=1.0, actions=[narval_state_publisher_node])
     rviz_timer = TimerAction(period=1.0, actions=[rviz_node])
 
     # Combine into launch description

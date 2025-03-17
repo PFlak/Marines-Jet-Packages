@@ -22,7 +22,9 @@ from narval_thruster_manager.thruster import Thruster
 from narval_thruster_manager.logger import Logger
 from geometry_msgs.msg import WrenchStamped
 from geometry_msgs.msg import TransformStamped
-
+from std_msgs.msg import Float64MultiArray
+import scipy.sparse as sp
+import osqp
 import numpy as np
 
 class ThrusterAllocationMatrix:
@@ -52,6 +54,9 @@ class ThrusterAllocationMatrix:
         else:
             self.__logger = Logger("ThrusterAllocationMatrix")
 
+        self.num_thrusters = 0
+        self.osqp_solver = None
+
     def add_thruster(self, thruster):
         """
         Adds a single thruster to the TAM.
@@ -64,6 +69,7 @@ class ThrusterAllocationMatrix:
 
         try:
             self._thruster_list.append(thruster)
+            self.num_thrusters += 1
             
         except Exception as e:
             self.__logger.error(f"Could not add thruster: {e}")
@@ -115,8 +121,8 @@ class ThrusterAllocationMatrix:
         
         for thruster in self._thruster_list:
             try:
-                f = thruster.get_thruster_force_axis()
-                r = thruster.get_translation_np_array()
+                f = thruster.thruster_force_axis
+                r = thruster.translation_np_array
 
                 self.__logger.info(f"F:\n{f}\nR:\n{r}")
 
@@ -128,8 +134,11 @@ class ThrusterAllocationMatrix:
             except Exception as e:
                 self.__logger.error(f"Error during calculating TAM: {str(e)}")
 
+        self.num_thrusters = len(self._thruster_list)
         self.__tam = np.array(T).T
         self.__logger.info(f"{self.__tam}")
+
+        self.osqp_solver = self.setup_osqp()
 
     def get_TAM(self):
         """
@@ -144,7 +153,7 @@ class ThrusterAllocationMatrix:
 
         return self.__tam
     
-    def solve_wrench(self, wrench: WrenchStamped):
+    def solve_wrench(self, wrench: WrenchStamped, algo = 'pseudoinv'):
         """
         Solves for the required thruster forces to achieve a desired wrench.
 
@@ -163,11 +172,51 @@ class ThrusterAllocationMatrix:
                                    wrench.wrench.torque.y,
                                    wrench.wrench.torque.z])
         
-        tam_pseudoinverse = np.linalg.pinv(self.__tam)
+        if algo == 'pseudoinv':
+            tam_pseudoinverse = np.linalg.pinv(self.__tam)
 
-        thruster_outputs = np.dot(tam_pseudoinverse, desired_wrench)
+            thruster_outputs = np.dot(tam_pseudoinverse, desired_wrench)
+        
+        elif algo == 'qp':
+            self.osqp_solver.update(l=desired_wrench, u=desired_wrench)
 
+            result = self.osqp_solver.solve()
+
+            if result.info.status_val in [osqp.constant('OSQP_SOLVED')]:
+                thruster_outputs = result.x
+
+            else:
+                self.__logger.warning("QP solver failed, returning zero forces.")
+                thruster_outputs = np.zeros(self.num_thrusters)
+        
         for i, thruster in enumerate(self._thruster_list):
             thruster.update_force(thruster_outputs[i])
 
+        thruster_outputs = self.scale(thruster_outputs)
+
         return thruster_outputs, self.get_thrusters()
+    
+    def setup_osqp(self):
+        
+        P = sp.eye(self.num_thrusters).tocsc()
+
+        A = sp.csc_matrix(self.__tam)
+
+        l = np.full(6, 5)
+        u = np.full(6, 10)
+
+        solver = osqp.OSQP()
+        solver.setup(P, np.zeros(self.num_thrusters), A, l, u, verbose=False)
+
+        return solver
+    
+    def scale(self, thruster_outputs):
+
+        thrust_coef = 0.167
+        torque_coef = 0.016
+
+        rpm_output = np.sign(thruster_outputs) * np.sqrt(np.abs(thruster_outputs) / thrust_coef)
+
+        return rpm_output
+    
+    
