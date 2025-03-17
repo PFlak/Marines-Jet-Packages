@@ -1,0 +1,4 @@
+[submodule "narval_stonefish"]
+	path = narval_stonefish
+	url = https://github.com/PFlak/narval_stonefish.git
+	branch = main
