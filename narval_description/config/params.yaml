@@ -1,0 +1,8 @@
+n_state_publisher:
+  ros__parameters:
+
+    # Available at this moment:
+    #  - simplified_narval - simplified version of narval
+    #  - narval_base - narval only with actuators
+    #  - bluerov2 - bluerov2
+    robot_name: simplified_narval

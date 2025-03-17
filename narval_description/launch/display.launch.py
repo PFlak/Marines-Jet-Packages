@@ -1,47 +1,46 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.actions import IncludeLaunchDescription
-from launch.conditions import IfCondition, UnlessCondition
+from launch.substitutions import Command
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 
-
 def generate_launch_description():
-    ld = LaunchDescription()
+        description_share = FindPackageShare('narval_description')
 
-    narval_description_package = FindPackageShare('narval_description')
+        default_config_path = PathJoinSubstitution([description_share, 'config', 'params.yaml'])
+        default_rviz_config_path = PathJoinSubstitution([description_share, 'rviz', 'urdf.rviz'])
 
-    ld.add_action(DeclareLaunchArgument(name='jsp_gui', default_value='false', choices=['true', 'false'],
-                                        description='Flag to enable joint_state_publisher_gui'))
+        config_arg = DeclareLaunchArgument(
+                name="config",
+                default_value=default_config_path,
+                description="Path to the configuration file for the narval state publisher"
+        )
 
-    default_rviz_config_path = PathJoinSubstitution([narval_description_package, 'rviz', 'urdf.rviz'])
-    ld.add_action(DeclareLaunchArgument(name='rviz_config', default_value=default_rviz_config_path,
-                                        description='Absolute path to rviz config file'))
+        rviz_config_arg = DeclareLaunchArgument(
+                name="rviz_config",
+                default_value=default_rviz_config_path,
+                description='Path to the RViz2 configuration file'
+        )
 
-    # need to manually pass configuration in because of https://github.com/ros2/launch/issues/313
-    ld.add_action(IncludeLaunchDescription(
-        PathJoinSubstitution([narval_description_package, 'launch', 'description.launch.py'])
-    ))
+        narval_state_publisher_node = Node(
+                package='narval_description',
+                executable='narval_state_publisher',
+                parameters=[LaunchConfiguration('config')]
+        )
 
-    # Depending on gui parameter, either launch joint_state_publisher or joint_state_publisher_gui
-    ld.add_action(Node(
-        package='joint_state_publisher',
-        executable='joint_state_publisher',
-        condition=UnlessCondition(LaunchConfiguration('jsp_gui'))
-    ))
+        rviz_node = Node(
+                package='rviz2',
+                executable='rviz2',
+                output='screen',
+                arguments=['-d', LaunchConfiguration('rviz_config')]
+        )
 
-    ld.add_action(Node(
-        package='joint_state_publisher_gui',
-        executable='joint_state_publisher_gui',
-        condition=IfCondition(LaunchConfiguration('jsp_gui'))
-    ))
-
-    ld.add_action(Node(
-        package='rviz2',
-        executable='rviz2',
-        output='screen',
-        arguments=['-d', LaunchConfiguration('rviz_config')],
-    ))
-    return ld
+        return LaunchDescription([
+                config_arg,
+                rviz_config_arg,
+                narval_state_publisher_node,
+                rviz_node
+        ])
