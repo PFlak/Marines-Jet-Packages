@@ -2,3 +2,7 @@
 	path = narval_stonefish
 	url = https://github.com/PFlak/narval_stonefish.git
 	branch = main
+[submodule "narval_PID"]
+	path = narval_PID
+	url = https://github.com/PFlak/narval_PID.git
+	branch = main
