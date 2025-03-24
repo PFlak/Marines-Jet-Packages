@@ -6,3 +6,7 @@
 	path = narval_PID
 	url = https://github.com/PFlak/narval_PID.git
 	branch = main
+[submodule "narval_msgs"]
+	path = narval_msgs
+	url = https://github.com/PFlak/narval_msgs.git
+	branch = main
