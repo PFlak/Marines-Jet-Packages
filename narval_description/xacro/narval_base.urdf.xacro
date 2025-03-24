@@ -127,22 +127,22 @@
     </link>
 
     <!-- Attach thrusters to the base_link -->
-    <xacro:t200 name="front_right" side="right">
+    <xacro:t200 name="t1" side="right">
         <xacro:insert_block name="front_right_origin" />
     </xacro:t200>
-    <xacro:t200 name="front_left" side="left">
+    <xacro:t200 name="t2" side="left">
         <xacro:insert_block name="front_left_origin" />
     </xacro:t200>
-    <xacro:t200 name="rear_right" side="right">
+    <xacro:t200 name="t5" side="right">
         <xacro:insert_block name="rear_right_origin" />
     </xacro:t200>
-    <xacro:t200 name="rear_left" side="left">
+    <xacro:t200 name="t6" side="left">
         <xacro:insert_block name="rear_left_origin" />
     </xacro:t200>
-    <xacro:t200 name="middle_right" side="right">
+    <xacro:t200 name="t3" side="right">
         <xacro:insert_block name="middle_right_origin" />
     </xacro:t200>
-    <xacro:t200 name="middle_left" side="left">
+    <xacro:t200 name="t4" side="left">
         <xacro:insert_block name="middle_left_origin" />
     </xacro:t200>
 

@@ -25,10 +25,14 @@
   <xacro:property name="HEIGHT" value="0.22"/>
   <xacro:property name="LENGTH" value="0.662"/>
   <xacro:property name="MASS" value="11.51"/>
-  <xacro:property name="CoG_X" value="0.03435"/>
-  <xacro:property name="CoG_Y" value="0.001402"/>
-  <xacro:property name="CoG_Z" value="0.00012"/>
+  <xacro:property name="CoG_X" value="0"/>
+  <xacro:property name="CoG_Y" value="0"/>
+  <xacro:property name="CoG_Z" value="0.05"/>
   <xacro:property name="CoG" value="${CoG_X} ${CoG_Y} ${CoG_Z}"/>
+
+  <xacro:macro name='CoG_origin' params="X Y Z rpy" >
+    <origin xyz="${X + CoG_X} ${Y + CoG_Y} ${Z + CoG_Z}" rpy="${rpy}"/>
+  </xacro:macro>
 
   <!-- Thruster macro -->
   <xacro:macro name="t200" params="side name *origin">
@@ -49,27 +53,31 @@
 
   <link name="base_link">
     <visual>
-      <origin xyz="0.0 0.0 0.0" rpy="${PI} 0.0 0.0"/>
+      <!-- <origin xyz="0.0 0.0 0.0" rpy="${PI} 0.0 0.0"/> -->
+      <xacro:CoG_origin X="0" Y="0" Z="0" rpy="${PI} 0 0"/>
       <geometry>
         <mesh filename="package://narval_description/meshes/bluerov2.obj" scale="1 1 1"/>
       </geometry>
       <material name="Fiberglass"/>
     </visual>
     <collision>
-      <origin xyz="0.0 0.0 0.0" rpy="${PI} 0.0 0.0"/>
+      <!-- <origin xyz="0.0 0.0 0.0" rpy="${PI} 0.0 0.0"/> -->
+      <xacro:CoG_origin X="0" Y="0" Z="0" rpy="${PI} 0 0"/>
       <geometry>
         <mesh filename="package://narval_description/meshes/bluerov2_phy.obj" scale="1 1 1"/>
       </geometry>
     </collision>
     <visual>
-      <origin xyz="0.0 0.0 0.03" rpy="${PI} 0.0 0.0"/>
+      <!-- <origin xyz="0.0 0.0 0.03" rpy="${PI} 0.0 0.0"/> -->
+      <xacro:CoG_origin X="0" Y="0" Z="0.03" rpy="${PI} 0 0"/>
       <geometry>
         <mesh filename="package://narval_description/meshes/bluerov2_wings.obj" scale="1 1 1"/>
       </geometry>
       <material name="Black"/>
     </visual>
     <collision>
-      <origin xyz="0.0 0.0 0.03" rpy="${PI} 0.0 0.0"/>
+      <!-- <origin xyz="0.0 0.0 0.03" rpy="${PI} 0.0 0.0"/> -->
+      <xacro:CoG_origin X="0" Y="0" Z="0.03" rpy="${PI} 0 0"/>
       <geometry>
         <mesh filename="package://narval_description/meshes/bluerov2_ring.obj" scale="1 1 1"/>
       </geometry>
@@ -79,42 +87,50 @@
   <!-- Thruster origins -->
   <xacro:property name="front_right_origin">
     <!-- <origin xyz="0.1355 0.1 0.0725" rpy="0 0 -0.7853981634"/> -->
-    <origin xyz="0.1355 0.1 -0.0725" rpy="${PI} 0 -0.7853981634"/>
+    <!-- <origin xyz="0.1355 0.1 -0.0725" rpy="${PI} 0 -0.7853981634"/> -->
+    <xacro:CoG_origin X="0.1355" Y="0.1" Z="-0.0725" rpy="0 0 -0.7853981634"/>
 
   </xacro:property>
   <xacro:property name="front_left_origin">
     <!-- <origin xyz="0.1355 -0.1 0.0725" rpy="0 0 0.7853981634"/> -->
-    <origin xyz="0.1355 -0.1 -0.0725" rpy="${PI} 0 0.7853981634"/>
+    <!-- <origin xyz="0.1355 -0.1 -0.0725" rpy="${PI} 0 0.7853981634"/> -->
+    <xacro:CoG_origin X="0.1355" Y="-0.1" Z="-0.0725" rpy="0 0 0.7853981634"/>
 
   </xacro:property>
   <xacro:property name="rear_right_origin">
     <!-- <origin xyz="-0.1475 0.1 0.0725" rpy="0 0 -2.3561944902"/> -->
-    <origin xyz="-0.1475 0.1 -0.0725" rpy="${PI} 0 -2.3561944902"/>
+    <!-- <origin xyz="-0.1475 0.1 -0.0725" rpy="${PI} 0 -2.3561944902"/> -->
+    <xacro:CoG_origin X="-0.1475" Y="0.1" Z="-0.0725" rpy="0 0 -2.3561944902"/>
 
   </xacro:property>
   <xacro:property name="rear_left_origin">
     <!-- <origin xyz="-0.1475 -0.1 0.0725" rpy="0 0 2.3561944902"/> -->
-    <origin xyz="-0.1475 -0.1 -0.0725" rpy="${PI} 0 2.3561944902"/>
+    <!-- <origin xyz="-0.1475 -0.1 -0.0725" rpy="${PI} 0 2.3561944902"/> -->
+    <xacro:CoG_origin X="-0.1475" Y="-0.1" Z="-0.0725" rpy="0 0 2.3561944902"/>
 
   </xacro:property>
   <xacro:property name="dive_front_right_origin">
     <!-- <origin xyz="0.12 0.218 0.0" rpy="0 -1.5707963268 0"/> -->
-    <origin xyz="0.12 0.218 0.0" rpy="${PI} -1.5707963268 0"/>
+    <!-- <origin xyz="0.12 0.218 0.0" rpy="${PI} -1.5707963268 0"/> -->
+    <xacro:CoG_origin X="0.12" Y="0.218" Z="0.0" rpy="${PI} -1.5707963268 0"/>
 
   </xacro:property>
   <xacro:property name="dive_front_left_origin">
     <!-- <origin xyz="0.12 -0.218 0.0" rpy="0 -1.5707963268 0"/> -->
-    <origin xyz="0.12 -0.218 0.0" rpy="${PI} -1.5707963268 0"/>
+    <!-- <origin xyz="0.12 -0.218 0.0" rpy="${PI} -1.5707963268 0"/> -->
+    <xacro:CoG_origin X="0.12" Y="-0.218" Z="0.0" rpy="${PI} -1.5707963268 0"/>
 
   </xacro:property>
   <xacro:property name="dive_rear_right_origin">
     <!-- <origin xyz="-0.12 0.218 0.0" rpy="0 -1.5707963268 0"/> -->
-    <origin xyz="-0.12 0.218 0.0" rpy="${PI} -1.5707963268 0"/>
+    <!-- <origin xyz="-0.12 0.218 0.0" rpy="${PI} -1.5707963268 0"/> -->
+    <xacro:CoG_origin X="-0.12" Y="0.218" Z="0.0" rpy="${PI} -1.5707963268 0"/>
 
   </xacro:property>
   <xacro:property name="dive_rear_left_origin">
     <!-- <origin xyz="-0.12 -0.218 0.0" rpy="0 -1.5707963268 0"/> -->
-    <origin xyz="-0.12 -0.218 0.0" rpy="${PI} -1.5707963268 0"/>
+    <!-- <origin xyz="-0.12 -0.218 0.0" rpy="${PI} -1.5707963268 0"/> -->
+    <xacro:CoG_origin X="-0.12" Y="-0.218" Z="0.0" rpy="${PI} -1.5707963268 0"/>
 
   </xacro:property>
 
