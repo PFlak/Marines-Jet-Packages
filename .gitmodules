@@ -3,7 +3,7 @@
 	url = https://github.com/PFlak/narval_stonefish.git
 	branch = main
 [submodule "narval_PID"]
-	path = narval_PID
+	path = narval_pid
 	url = https://github.com/PFlak/narval_PID.git
 	branch = main
 [submodule "narval_msgs"]
