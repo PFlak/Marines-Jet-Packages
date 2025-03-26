@@ -10,3 +10,7 @@
 	path = narval_msgs
 	url = https://github.com/PFlak/narval_msgs.git
 	branch = main
+[submodule "narval_bridge"]
+	path = narval_bridge
+	url = https://github.com/PFlak/narval_bridge.git
+	branch = main
